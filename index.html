@@ -1,1 +1,252 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <link rel="shortcut icon" href="icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <meta name="theme-color" content="#0b0e11">
+    <title>ArbiTrack Mobile Pro</title>
+    <style>
+        :root { 
+            --gold: #F3BA2F; --bg: #0b0e11; --card: #1e2329; --input: #2b3139; 
+            --gray: #848e9c; --red: #f6465d; --green: #0ecb81; --white: #ffffff;
+            --blue: #3772ff;
+        }
+
+        /* SPLASH SCREEN CON IMAGEN SOLICITADA Y SIN BORDE */
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+            text-align: center;
+        }
+        .splash-logo { 
+            width: 85px; height: 85px; object-fit: contain; 
+            margin-bottom: 15px; 
+            /* Borde eliminado */
+            animation: pulse 1.5s infinite; 
+        }
+        .splash-title { color: var(--gold); font-size: 20px; font-weight: 900; line-height: 1.2; letter-spacing: 1px; }
+        .splash-title span { color: var(--white); display: block; font-size: 16px; margin-top: 4px; }
+        .splash-version { color: var(--gray); font-size: 10px; margin-top: 10px; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* RESET MÓVIL */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        body { 
+            background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; padding: 8px; display: flex; flex-direction: column; align-items: center;
+            overflow-x: hidden;
+        }
+
+        .main-content { display: none; width: 100%; max-width: 360px; flex-direction: column; }
+
+        .tab-container { display: flex; background: #111; border-radius: 8px; padding: 2px; margin-bottom: 10px; border: 1px solid #333; }
+        .tab-btn { flex: 1; padding: 8px 2px; border: none; background: transparent; color: var(--gray); font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 9px; text-transform: uppercase; }
+        .tab-btn.active { background: var(--input); color: var(--gold); }
+
+        .calc-card { background: var(--card); padding: 12px; border-radius: 15px; border: 1px solid #333; width: 100%; }
+        .hidden { display: none; }
+        
+        .input-group { margin-bottom: 8px; }
+        label { display: block; font-size: 10px; color: var(--gray); margin-bottom: 3px; font-weight: bold; }
+        input { width: 100%; background: var(--input); border: 1px solid #474d57; color: white; padding: 10px; border-radius: 8px; font-size: 14px; outline: none; }
+
+        .btn-fee-info {
+            display: block; width: 100%; padding: 6px; margin-top: 4px;
+            background: rgba(243, 186, 47, 0.1); border: 1px solid var(--gold);
+            color: var(--gold); text-decoration: none; text-align: center;
+            font-size: 9px; border-radius: 6px; font-weight: bold;
+        }
+
+        .type-selector { display: flex; gap: 5px; margin-bottom: 10px; }
+        .type-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #111; color: var(--gray); font-weight: bold; font-size: 11px; }
+        .type-btn.active-buy { border-color: var(--green); color: var(--green); background: rgba(14, 203, 129, 0.1); }
+        .type-btn.active-sell { border-color: var(--red); color: var(--red); background: rgba(246, 70, 93, 0.1); }
+
+        .results { background: rgba(0,0,0,0.4); border-radius: 10px; padding: 10px; margin-top: 10px; border: 1px solid #333; }
+        .res-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+        
+        .save-box { text-align: center; padding: 10px; border-radius: 10px; border: 1px solid var(--gold); background: rgba(243,186,47,0.05); }
+        .main-res-val { font-size: 22px; font-weight: 900; line-height: 1; margin: 5px 0; }
+
+        .btn-row { display: flex; gap: 4px; margin-top: 4px; }
+        .btn-tasa { flex: 1; padding: 8px; border-radius: 6px; font-size: 9px; font-weight: bold; cursor: pointer; border: 1px solid; text-align: center; }
+        .btn-web { background: #34495e; color: #ecf0f1; border-color: #2c3e50; text-decoration: none; }
+        
+        .btn-import { width: 100%; background: rgba(55, 114, 255, 0.1); border: 1px solid var(--blue); color: var(--blue); padding: 8px; margin-top: 5px; border-radius: 6px; font-size: 10px; font-weight: bold; }
+        .btn-clear { width: 100%; background: rgba(246, 70, 93, 0.05); border: 1px solid rgba(246, 70, 93, 0.2); color: var(--red); padding: 10px; margin-top: 10px; border-radius: 8px; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="splash">
+        <img class="splash-logo" src="icon - copia.png" onerror="this.src='icon.png'" alt="Logo Carga">
+        <div class="splash-title">ARBITRACK MOBILE<span>PRO</span></div>
+        <div class="splash-version">VERSION V1.0</div>
+    </div>
+
+    <div id="app" class="main-content">
+        <div class="tab-container">
+            <button class="tab-btn active" id="tab-p2p" onclick="switchTab('p2p')">P2P</button>
+            <button class="tab-btn" id="tab-binance" onclick="switchTab('binance')">Binance vs BCV</button>
+            <button class="tab-btn" id="tab-movil" onclick="switchTab('movil')">Pago Móvil</button>
+        </div>
+
+        <div id="section-p2p" class="calc-card">
+            <div class="type-selector">
+                <button class="type-btn active-buy" id="btnBuy" onclick="setMode('compra')">COMPRA</button>
+                <button class="type-btn" id="btnSell" onclick="setMode('venta')">VENTA</button>
+            </div>
+            <div class="input-group"><label>CANTIDAD FIAT</label><input type="number" id="fiat" placeholder="0.00" oninput="calcP2P()"></div>
+            <div class="input-group"><label>TASA P2P</label><input type="number" id="tasa_p2p" placeholder="0.00" oninput="calcP2P()"></div>
+            <div class="input-group">
+                <label>COMISIÓN %</label>
+                <input type="number" id="comi_perc" value="0.2431" step="0.0001" oninput="calcP2P()">
+                <a href="https://www.binance.com/es/fee/p2pFeeRate" target="_blank" class="btn-fee-info">CONSULTAR TASAS DE COMISIÓN BINANCE</a>
+            </div>
+            <div class="results">
+                <div class="res-item"><span>Recibir:</span> <b id="p_bruto">0.0000</b></div>
+                <div class="res-item"><span>Comisión:</span> <b id="p_comi" style="color:var(--red)">0.0000</b></div>
+                <div class="save-box">
+                    <div style="font-size: 8px; font-weight: bold; color: var(--gold);">GANANCIA APROXIMADA</div>
+                    <div id="p_gan" class="main-res-val">$ 0.0000</div>
+                    <div id="p_porc" style="font-size:11px; font-weight:bold;">0.00 %</div>
+                </div>
+            </div>
+            <button class="btn-clear" onclick="limpiar('p2p')">Limpiar P2P</button>
+        </div>
+
+        <div id="section-binance" class="calc-card hidden">
+            <div class="input-group">
+                <label>Tasa Oficial BCV</label>
+                <input type="number" id="t_bcv" placeholder="0.00" oninput="calcBinance()">
+                <div class="btn-row">
+                    <button class="btn-tasa" style="background:rgba(14,203,129,0.1); color:var(--green); border-color:var(--green)" onclick="setTasa(419.98)">USD 419.98</button>
+                    <button class="btn-tasa" style="background:rgba(55,114,255,0.1); color:var(--blue); border-color:var(--blue)" onclick="setTasa(438.82)">EUR 438.82</button>
+                    <a href="https://www.bcv.org.ve" target="_blank" class="btn-tasa btn-web">WEB BCV</a>
+                </div>
+            </div>
+            <div class="input-group"><label>Monto Cambiar ($)</label><input type="number" id="m_dolares" placeholder="0.00" oninput="calcBinance()"></div>
+            <div class="input-group"><label>Tasa Binance (P2P)</label><input type="number" id="t_binance" placeholder="0.00" oninput="calcBinance()"></div>
+            <div class="results">
+                <div class="res-item"><span>BCV:</span> <b id="res_bcv" style="color:var(--blue)">0.00 Bs.</b></div>
+                <div class="res-item"><span>Binance:</span> <b id="res_binance" style="color:var(--gold)">0.00 Bs.</b></div>
+                <div class="save-box" style="border-color:var(--green); background: rgba(14, 203, 129, 0.05);">
+                    <div style="font-size: 9px; font-weight: bold; color: var(--green);">AHORRO ESTIMADO</div>
+                    <div id="res_ahorro_bs" style="color:var(--green); font-weight: bold;">0.00 Bs.</div>
+                    <div id="res_ahorro_usd" style="color:var(--green); font-size: 18px; font-weight: 900;">$ 0.00</div>
+                    <div id="res_porcentaje" style="font-size: 10px;">0.00 %</div>
+                </div>
+            </div>
+            <button class="btn-clear" onclick="limpiar('binance')">Limpiar Binance</button>
+        </div>
+
+        <div id="section-movil" class="calc-card hidden">
+            <div class="input-group">
+                <label>Monto Bolívares</label>
+                <input type="number" id="monto_pm" placeholder="0.00" oninput="calcMovil()">
+                <button class="btn-import" onclick="importarDesdeBinance()">↓ Importar Total Binance</button>
+            </div>
+            <div class="results">
+                <div class="res-item"><span>Comisión (0.31%):</span> <b id="pm_comi" style="color:var(--red)">0.00 Bs.</b></div>
+                <div class="save-box" style="border-color:var(--white);">
+                    <div style="font-size: 9px; font-weight: bold; color: var(--green);">TOTAL A ENVIAR POR PAGO MOVIL</div>
+                    <div id="pm_total" class="main-res-val">0.00 Bs.</div>
+                </div>
+            </div>
+            <button class="btn-clear" onclick="limpiar('movil')">Limpiar Pago Móvil</button>
+        </div>
+    </div>
+
+<script>
+    setTimeout(() => {
+        const s = document.getElementById('splash');
+        s.style.opacity = '0';
+        setTimeout(() => { s.style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 500);
+    }, 3000);
+
+    let currentMode = 'compra';
+    let totalBinanceGlobal = 0;
+
+    function switchTab(t) {
+        ['binance', 'p2p', 'movil'].forEach(s => {
+            document.getElementById('section-'+s).classList.toggle('hidden', s !== t);
+            document.getElementById('tab-'+s).classList.toggle('active', s === t);
+        });
+    }
+
+    function setMode(m) { 
+        currentMode = m; 
+        document.getElementById('btnBuy').className = 'type-btn '+(m==='compra'?'active-buy':''); 
+        document.getElementById('btnSell').className = 'type-btn '+(m==='venta'?'active-sell':''); 
+        document.getElementById('comi_perc').value = (m === 'compra') ? '0.2431' : '0.2450';
+        calcP2P(); 
+    }
+
+    function calcP2P() { 
+        const fiat = parseFloat(document.getElementById('fiat').value) || 0;
+        const tasa = parseFloat(document.getElementById('tasa_p2p').value) || 0;
+        const comiPerc = parseFloat(document.getElementById('comi_perc').value) || 0;
+        if (fiat > 0 && tasa > 0) { 
+            const a_recibir = fiat / tasa;
+            const comision = a_recibir * (comiPerc / 100);
+            let resultado = (currentMode === 'venta') ? (fiat - a_recibir - comision) : ((fiat - a_recibir + comision) * -1);
+            let porc = (resultado / fiat) * 100;
+            document.getElementById('p_bruto').innerText = a_recibir.toFixed(4); 
+            document.getElementById('p_comi').innerText = comision.toFixed(4); 
+            const mainRes = document.getElementById('p_gan');
+            mainRes.innerText = "$ " + resultado.toFixed(4);
+            mainRes.style.color = (resultado > 0) ? "var(--green)" : (resultado < 0 ? "var(--red)" : "var(--white)");
+            const pLabel = document.getElementById('p_porc');
+            pLabel.innerText = porc.toFixed(2) + " %";
+            pLabel.style.color = (resultado > 0) ? "var(--green)" : (resultado < 0 ? "var(--red)" : "var(--white)");
+        } 
+    }
+
+    function setTasa(v) { document.getElementById('t_bcv').value = v; calcBinance(); }
+
+    function calcBinance() {
+        const m = parseFloat(document.getElementById('m_dolares').value)||0;
+        const b = parseFloat(document.getElementById('t_bcv').value)||0;
+        const n = parseFloat(document.getElementById('t_binance').value)||0; 
+        if(m && b && n) { 
+            const bcv = m * b; totalBinanceGlobal = m * n; const ah_bs = totalBinanceGlobal - bcv; const ah_usd = ah_bs / n;
+            document.getElementById('res_bcv').innerText = bcv.toLocaleString('es-VE')+" Bs."; 
+            document.getElementById('res_binance').innerText = totalBinanceGlobal.toLocaleString('es-VE')+" Bs."; 
+            document.getElementById('res_ahorro_bs').innerText = ah_bs.toLocaleString('es-VE')+" Bs.";
+            document.getElementById('res_ahorro_usd').innerText = "$ " + ah_usd.toFixed(2);
+            document.getElementById('res_porcentaje').innerText = ((ah_bs/bcv)*100).toFixed(2) + " %";
+        }
+    }
+
+    function calcMovil() { 
+        const m = parseFloat(document.getElementById('monto_pm').value) || 0; 
+        const c = m * 0.0031; 
+        document.getElementById('pm_comi').innerText = c.toLocaleString('es-VE') + " Bs."; 
+        document.getElementById('pm_total').innerText = (m + c).toLocaleString('es-VE') + " Bs."; 
+    }
+
+    function importarDesdeBinance() {
+        if(totalBinanceGlobal > 0) { document.getElementById('monto_pm').value = totalBinanceGlobal.toFixed(2); calcMovil(); }
+        else { alert("Calcula en Binance primero."); }
+    }
+
+    function limpiar(s) {
+        if(s==='p2p') { 
+            document.getElementById('fiat').value=''; document.getElementById('tasa_p2p').value=''; 
+            document.getElementById('p_gan').innerText = "$ 0.0000"; document.getElementById('p_gan').style.color = "white";
+        }
+        if(s==='binance') { document.getElementById('m_dolares').value=''; document.getElementById('t_binance').value=''; calcBinance(); }
+        if(s==='movil') { document.getElementById('monto_pm').value=''; calcMovil(); }
+    }
+</script>
+</body>
+</html>
